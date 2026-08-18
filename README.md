@@ -33,6 +33,22 @@ If prompted, authorize it for the `fedibtc` org (SSO).
 If an install fails with a generic error, it is almost always the `docker
 login` from step 1 missing or an expired token.
 
+### Fallback: no GHCR access
+
+Until the images are published to GHCR (needs a `write:packages` token), skip
+step 1 and load them straight from the `ms` build host (repo checkout, then
+`nix build .#fleet-manager-oci-image` / `.#operator-ui-fman-oci-image`, or ask
+whoever last built them):
+
+```sh
+ssh ms 'docker save ghcr.io/fedibtc/fleet-manager:0.1.0 | gzip' | ssh umbrel@umbrel.local 'docker load'
+ssh ms 'docker save ghcr.io/fedibtc/manifold-operator-ui-fman:0.1.0 | gzip' | ssh umbrel@umbrel.local 'docker load'
+```
+
+Compose only pulls missing images, so pre-loaded images make the registry
+irrelevant. Note: a future in-UI "Update" will try to pull; re-load newer
+images the same way first.
+
 ## What the app runs
 
 - `ghcr.io/fedibtc/fleet-manager` — the FMan daemon, `--manifold-environment
