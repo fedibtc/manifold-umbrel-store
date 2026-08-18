@@ -33,6 +33,18 @@ If prompted, authorize it for the `fedibtc` org (SSO).
 If an install fails with a generic error, it is almost always the `docker
 login` from step 1 missing or an expired token.
 
+4. **Onboard the daemon** (one-time; the dashboard shows "Can't reach the
+   fleet manager" until this runs). Pre-onboarding, the daemon serves only
+   its Unix admin socket — the admin HTTP the dashboard needs starts after
+   onboarding, so a fresh install must be onboarded from the device:
+
+   ```sh
+   ssh umbrel@umbrel.local docker exec fedi-dev-fleet-manager_app_1 \
+     fleet-manager admin --data-dir /data onboard new
+   ```
+
+   Then hit **Retry** in the dashboard.
+
 ### Getting the images onto the device
 
 GHCR publishing is blocked until someone has a `write:packages` token, so the
