@@ -1,0 +1,39 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      # Umbrel's authenticating proxy fronts the Caddy UI, which shares the
+      # app container's network namespace (see `ui.network_mode`).
+      APP_HOST: fedi-dev-fleet-manager_app_1
+      APP_PORT: 8080
+
+  app:
+    image: ghcr.io/fedibtc/fleet-manager:0.1.0
+    restart: on-failure
+    stop_grace_period: 1m
+    # The image's stock entrypoint targets production (mainnet Bitcoin Core,
+    # mandatory push gateway). This dev package runs the staging profile
+    # instead: Signet/Mutinynet via the profile's default Esplora backend,
+    # callback-free (no push gateway).
+    entrypoint: ["fleet-manager"]
+    command:
+      - serve
+      - --data-dir=/data
+      - --manifold-environment=staging
+      - --max-seats=1
+      - --admin-http-bind=127.0.0.1:8181
+      - --admin-http-auth=trusted-proxy
+    volumes:
+      - ${APP_DATA_DIR}/data:/data
+    ports:
+      # Seat port grid: base 30000, 4 ports per seat, max-seats 1.
+      - "30000-30003:30000-30003"
+
+  ui:
+    image: ghcr.io/fedibtc/manifold-operator-ui-fman:0.1.0
+    restart: on-failure
+    # Shares the app container's network namespace so Caddy's
+    # `reverse_proxy 127.0.0.1:8181` reaches the admin API, which stays
+    # loopback-only (trusted-proxy contract: no host port on the listener).
+    network_mode: service:app
