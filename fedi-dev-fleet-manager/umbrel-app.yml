@@ -2,7 +2,7 @@ manifestVersion: 1
 id: fedi-dev-fleet-manager
 name: Fleet Manager (staging)
 category: bitcoin
-version: "0.1.0"
+version: "0.1.1-master.f7b7500c"
 tagline: Run a Fedimint guardian seat on the Manifold staging environment
 description: >-
   Fleet Manager coordinates Fedimint guardian seat formation and supervises
@@ -23,4 +23,4 @@ defaultPassword: ""
 submitter: Fedi
 submission: https://github.com/fedibtc/fman-umbrel-store
 releaseNotes: >-
-  Initial internal staging build.
+  Rebuild from master f7b7500c: fedimintd 0.11.1-fedi13, operator dashboard embedded in the daemon (onboarding now works from the browser).

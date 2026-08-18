@@ -33,17 +33,11 @@ If prompted, authorize it for the `fedibtc` org (SSO).
 If an install fails with a generic error, it is almost always the `docker
 login` from step 1 missing or an expired token.
 
-4. **Onboard the daemon** (one-time; the dashboard shows "Can't reach the
-   fleet manager" until this runs). Pre-onboarding, the daemon serves only
-   its Unix admin socket — the admin HTTP the dashboard needs starts after
-   onboarding, so a fresh install must be onboarded from the device:
-
-   ```sh
-   ssh umbrel@umbrel.local docker exec fedi-dev-fleet-manager_app_1 \
-     fleet-manager admin --data-dir /data onboard new
-   ```
-
-   Then hit **Retry** in the dashboard.
+4. **Onboard the daemon** from the dashboard itself: as of 0.1.1 (master
+   build) the operator dashboard is served during the onboarding phase and
+   walks you through `onboard new` / `onboard restore`. (On the old 0.1.0
+   image this required `docker exec … fleet-manager admin --data-dir /data
+   onboard new` from the device.)
 
 ### Getting the images onto the device
 
@@ -58,15 +52,17 @@ ssh umbrel@umbrel.local docker run -d --restart unless-stopped \
   --name fedi-dev-registry -p 127.0.0.1:5000:5000 registry:2
 ```
 
-Then stream the images in from wherever they were built (`ms`: `nix build
-.#fleet-manager-oci-image` / `.#operator-ui-fman-oci-image`, `docker load`):
+Then stream the image in from wherever it was built (`ms`: `nix build
+.#fleet-manager-oci-image`, `docker load`; since the 0.1.1 master builds the operator UI is
+embedded in the daemon binary, so there is only this one image):
+
+The Nix image tag is the Cargo workspace version (`0.1.0`); retag it to the
+package's provenance tag from `docker-compose.yml` when pushing:
 
 ```sh
-for img in fleet-manager manifold-operator-ui-fman; do
-  ssh ms "docker save ghcr.io/fedibtc/$img:0.1.0 | gzip" | ssh umbrel@umbrel.local "docker load && \
-    docker tag ghcr.io/fedibtc/$img:0.1.0 127.0.0.1:5000/$img:0.1.0 && \
-    docker push -q 127.0.0.1:5000/$img:0.1.0"
-done
+ssh ms "docker save fleet-manager:0.1.0 | gzip" | ssh umbrel@umbrel.local "docker load && \
+  docker tag fleet-manager:0.1.0 127.0.0.1:5000/fleet-manager:0.1.1-master.f7b7500c && \
+  docker push -q 127.0.0.1:5000/fleet-manager:0.1.1-master.f7b7500c"
 ```
 
 Re-run the loop with the new tag for updates, then use the in-UI **Update**.
@@ -76,12 +72,12 @@ refs and the local registry can be removed
 
 ## What the app runs
 
-- `ghcr.io/fedibtc/fleet-manager` — the FMan daemon, `--manifold-environment
-  staging`, 1 seat, Bitcoin via the staging profile's default Esplora
-  (no Umbrel Bitcoin Core dependency), no push gateway (callback-free).
-- `ghcr.io/fedibtc/manifold-operator-ui-fman` — the operator dashboard
-  (Caddy), sharing the daemon's network namespace; admin API stays
-  loopback-only per the trusted-proxy contract.
+- `fleet-manager` (built from master, fedimintd `0.11.1-fedi13`) — the FMan
+  daemon, `--manifold-environment staging`, 1 seat, Bitcoin via the staging
+  profile's default Esplora (no Umbrel Bitcoin Core dependency), no push
+  gateway (callback-free). The operator dashboard is embedded in the binary
+  and served on the admin HTTP listener behind Umbrel's authenticated proxy
+  (trusted-proxy contract: the listener has no host port).
 - Seat ports `30000-30003` are published on the device. Peers outside your
   LAN can only reach them if you forward those ports on your router.
 

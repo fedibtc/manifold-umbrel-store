@@ -3,37 +3,31 @@ version: "3.7"
 services:
   app_proxy:
     environment:
-      # Umbrel's authenticating proxy fronts the Caddy UI, which shares the
-      # app container's network namespace (see `ui.network_mode`).
+      # Umbrel's authenticating proxy fronts the daemon's operator dashboard
+      # directly: since 0.1.1 the UI is embedded in the fleet-manager binary
+      # (`embedded-operator-ui`) and served on the admin HTTP listener.
       APP_HOST: fedi-dev-fleet-manager_app_1
-      APP_PORT: 8080
+      APP_PORT: 8181
 
   app:
-    image: 127.0.0.1:5000/fleet-manager:0.1.0
+    image: 127.0.0.1:5000/fleet-manager:0.1.1-master.f7b7500c
     restart: on-failure
     stop_grace_period: 1m
     # The image's stock entrypoint targets production (mainnet Bitcoin Core,
     # mandatory push gateway). This dev package runs the staging profile
     # instead: Signet/Mutinynet via the profile's default Esplora backend,
-    # callback-free (no push gateway).
+    # callback-free (no push gateway). The admin listener has no host port;
+    # Umbrel's app_proxy is its only network peer (trusted-proxy contract).
     entrypoint: ["fleet-manager"]
     command:
       - serve
       - --data-dir=/data
       - --manifold-environment=staging
       - --max-seats=1
-      - --admin-http-bind=127.0.0.1:8181
+      - --admin-http-bind=0.0.0.0:8181
       - --admin-http-auth=trusted-proxy
     volumes:
       - ${APP_DATA_DIR}/data:/data
     ports:
       # Seat port grid: base 30000, 4 ports per seat, max-seats 1.
       - "30000-30003:30000-30003"
-
-  ui:
-    image: 127.0.0.1:5000/manifold-operator-ui-fman:0.1.0
-    restart: on-failure
-    # Shares the app container's network namespace so Caddy's
-    # `reverse_proxy 127.0.0.1:8181` reaches the admin API, which stays
-    # loopback-only (trusted-proxy contract: no host port on the listener).
-    network_mode: service:app
