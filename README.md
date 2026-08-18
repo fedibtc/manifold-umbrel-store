@@ -33,21 +33,34 @@ If prompted, authorize it for the `fedibtc` org (SSO).
 If an install fails with a generic error, it is almost always the `docker
 login` from step 1 missing or an expired token.
 
-### Fallback: no GHCR access
+### Getting the images onto the device
 
-Until the images are published to GHCR (needs a `write:packages` token), skip
-step 1 and load them straight from the `ms` build host (repo checkout, then
-`nix build .#fleet-manager-oci-image` / `.#operator-ui-fman-oci-image`, or ask
-whoever last built them):
+GHCR publishing is blocked until someone has a `write:packages` token, so the
+compose file pulls from a **device-local registry** on `127.0.0.1:5000`
+(umbreld force-pulls on install, so pre-loaded images alone are not enough —
+Docker trusts loopback registries without TLS, hence this shape). One-time
+setup per device, replacing step 1 above:
 
 ```sh
-ssh ms 'docker save ghcr.io/fedibtc/fleet-manager:0.1.0 | gzip' | ssh umbrel@umbrel.local 'docker load'
-ssh ms 'docker save ghcr.io/fedibtc/manifold-operator-ui-fman:0.1.0 | gzip' | ssh umbrel@umbrel.local 'docker load'
+ssh umbrel@umbrel.local docker run -d --restart unless-stopped \
+  --name fedi-dev-registry -p 127.0.0.1:5000:5000 registry:2
 ```
 
-Compose only pulls missing images, so pre-loaded images make the registry
-irrelevant. Note: a future in-UI "Update" will try to pull; re-load newer
-images the same way first.
+Then stream the images in from wherever they were built (`ms`: `nix build
+.#fleet-manager-oci-image` / `.#operator-ui-fman-oci-image`, `docker load`):
+
+```sh
+for img in fleet-manager manifold-operator-ui-fman; do
+  ssh ms "docker save ghcr.io/fedibtc/$img:0.1.0 | gzip" | ssh umbrel@umbrel.local "docker load && \
+    docker tag ghcr.io/fedibtc/$img:0.1.0 127.0.0.1:5000/$img:0.1.0 && \
+    docker push -q 127.0.0.1:5000/$img:0.1.0"
+done
+```
+
+Re-run the loop with the new tag for updates, then use the in-UI **Update**.
+When GHCR publishing lands, the compose file switches back to `ghcr.io/...`
+refs and the local registry can be removed
+(`docker rm -f fedi-dev-registry`).
 
 ## What the app runs
 
