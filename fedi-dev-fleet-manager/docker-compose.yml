@@ -10,7 +10,7 @@ services:
       APP_PORT: 8181
 
   app:
-    image: 127.0.0.1:5000/fleet-manager:0.1.1-master.f7b7500c
+    image: ghcr.io/fedibtc/manifold-fman:0bfc7a32d76fd73dc072eecb9b165b35a346da10
     restart: on-failure
     stop_grace_period: 1m
     # The image's stock entrypoint targets production (mainnet Bitcoin Core,
