@@ -2,48 +2,33 @@
 
 Internal-only Umbrel app store for testing Fleet Manager (FMan) on personal
 Umbrel devices against the Manifold **staging** environment
-(Mutinynet/Signet). Not for production use; this repo is private and the
-image is distributed out-of-band (no public registry yet).
+(Mutinynet/Signet). Not for production use; this repo and the image it
+installs are both private.
 
-Current package: `0.1.1-master.f7b7500c` — built from manifold master,
-fedimintd `0.11.1-fedi13`, operator dashboard embedded in the daemon.
+Current package: `0.1.2-master.0bfc7a32` — built from manifold master,
+fedimintd `0.11.1-fedi15`, operator dashboard embedded in the daemon.
 
 ## One-time device setup
 
-You need a GitHub personal access token with read access to this repo
-([create one here](https://github.com/settings/tokens); authorize it for the
-`fedibtc` org if prompted).
+You need the shared machine-user token from the team password manager. It
+has read access to this repo and to the `manifold-fman` package, and to
+nothing else. Do not use a personal token.
 
-1. **Run the device-local image registry.** There is no GHCR publication yet
-   (needs a `write:packages` token), so the compose file pulls from a
-   loopback registry on the device — umbreld force-pulls on install, so
-   pre-loaded images alone are not enough, and Docker trusts `127.0.0.1`
-   registries without TLS:
+1. **Log the device in to GHCR** so Docker can pull the private image:
 
    ```sh
-   ssh umbrel@umbrel.local docker run -d --restart unless-stopped \
-     --name fedi-dev-registry -p 127.0.0.1:5000:5000 registry:2
+   ssh umbrel@umbrel.local \
+     'echo <token> | sudo docker login ghcr.io -u <machine-user> --password-stdin'
    ```
 
-2. **Stream the image in** from wherever it was built (`ms`:
-   `nix build .#fleet-manager-oci-image`, then `docker load`). The Nix image
-   tag is the Cargo workspace version (`0.1.0`); retag it to the package's
-   provenance tag from `docker-compose.yml` when pushing:
-
-   ```sh
-   ssh ms "docker save fleet-manager:0.1.0 | gzip" | ssh umbrel@umbrel.local "docker load && \
-     docker tag fleet-manager:0.1.0 127.0.0.1:5000/fleet-manager:0.1.1-master.f7b7500c && \
-     docker push -q 127.0.0.1:5000/fleet-manager:0.1.1-master.f7b7500c"
-   ```
-
-3. **Add this store.** In umbrelOS: **App Store → ⋯ → Community App Stores**,
-   paste (with your PAT embedded):
+2. **Add this store.** In umbrelOS: **App Store → ⋯ → Community App
+   Stores**, paste (with the same token embedded):
 
    ```
-   https://<your-github-username>:<your-PAT>@github.com/fedibtc/fman-umbrel-store.git
+   https://<machine-user>:<token>@github.com/fedibtc/fman-umbrel-store.git
    ```
 
-4. **Install** *Fleet Manager (staging)* from the "Fedi Dev" store, open it,
+3. **Install** *Fleet Manager (staging)* from the "Fedi Dev" store, open it,
    and **onboard from the dashboard** (`onboard new`). The dashboard is
    served during the onboarding phase behind Umbrel's authenticated proxy —
    no separate app login.
@@ -52,8 +37,11 @@ You need a GitHub personal access token with read access to this repo
    error (frontend rendering bug; the wizard still works — see the operator
    UI underwriting in manifold PR #330).
 
-If an install fails instantly with a generic error, the registry from step 1
-is missing or the image/tag in step 2 doesn't match `docker-compose.yml`.
+On a device set up before this package moved to GHCR, drop the old loopback
+registry once the app is running: `docker rm -f fedi-dev-registry`.
+
+If an install fails instantly with a generic error, the device is not logged
+in to `ghcr.io` or its token has lost read access to the package.
 
 ## Make it discoverable (staging trust material)
 
@@ -106,14 +94,14 @@ no log lines, republish the policy with `nak` signed by staging test key 4.
 
 ## Releasing an update
 
-1. Build the image from the manifold commit you're shipping
-   (`nix build .#fleet-manager-oci-image` on `ms`) and stream it to each
-   device under a new provenance tag (step 2 above), e.g.
-   `0.1.2-master.<commit>`.
-2. Bump `version` in `fedi-dev-fleet-manager/umbrel-app.yml` and the image
-   tag in `docker-compose.yml` to the same provenance tag; commit and push
-   here. Keep the version semver-sortable **above** the previous one
-   (`0.1.2-…` after `0.1.1-…`; a `-suffix` sorts *below* its bare version).
+1. Merge to manifold master, or run its **Publish images** workflow. That
+   publishes `ghcr.io/fedibtc/manifold-fman:<commit-sha>` for amd64 and
+   arm64.
+2. Point `image:` in `docker-compose.yml` at that `<commit-sha>` and bump
+   `version` in `fedi-dev-fleet-manager/umbrel-app.yml` to
+   `0.1.<n>-master.<short-sha>`, then commit and push here. Keep the version
+   semver-sortable **above** the previous one (`0.1.2-…` after `0.1.1-…`; a
+   `-suffix` sorts *below* its bare version).
 3. Devices show a one-click **Update** in the Umbrel UI (store refresh can
    take a few minutes; "Update All" forces a refresh).
 4. Data (`${APP_DATA_DIR}`) survives updates but **not** uninstall/reinstall.
@@ -121,6 +109,3 @@ no log lines, republish the policy with `nak` signed by staging test key 4.
    downgrade or a stale-branch image against a master-created `/data` will
    crash-loop with a migration error — uninstall/reinstall and redo the
    trust-material steps in that case.
-
-When GHCR publishing lands, the compose file switches back to `ghcr.io/...`
-refs and the local registry can be removed (`docker rm -f fedi-dev-registry`).
