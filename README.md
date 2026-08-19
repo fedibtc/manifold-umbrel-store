@@ -32,10 +32,10 @@ from GHCR; the app pulls anonymously from the proxy.
    ```
 
 2. **Add this store.** In umbrelOS: **App Store → ⋯ → Community App Stores**,
-   paste (with your PAT embedded):
+   paste (with the same shared token embedded):
 
    ```
-   https://<your-github-username>:<your-PAT>@github.com/fedibtc/fman-umbrel-store.git
+   https://x:<PAT>@github.com/fedibtc/fman-umbrel-store.git
    ```
 
 3. **Install** *Fleet Manager (staging)* from the "Fedi Dev" store, open it,
@@ -57,30 +57,33 @@ current one).
 A fresh FMan is invisible to FIs until it has a peer badge, an offer, and a
 receivable setup-payment wallet. From the manifold repo:
 
-1. Get the FMan's identity: dashboard, or
-   `docker exec fedi-dev-fleet-manager_app_1 fleet-manager admin --data-dir /data onboarding`
-   → note `service_nostr_pubkey`.
-2. Issue a badge from the staging test issuer (level = the staging profile's
-   required minimum, currently 9):
+Everything except badge issuance is done in the operator dashboard; badge
+issuance needs a dev (until the planned staging badge bot lands).
+
+1. Note your FMan's `service_nostr_pubkey` from the dashboard and send it to
+   a dev on the team.
+2. **Dev**: issue a level-9 badge. With PR #405 (issuer authorities pinned in
+   the environment profile) the tool signs with the committed staging
+   authority — never pass an ad-hoc keyfile, that's how the staging authority
+   got rotated on 2026-08-18:
 
    ```sh
    cargo run -p devmon --bin manifold-test-issuer -- \
      --environment staging \
-     --issuer-secret-keys <persistent-keyfile> \
      --authorization-request '{"subject_pubkey":"<service_nostr_pubkey>"}' \
      --publish-fman-authorization
    ```
 
-3. Tell the daemon to look (authorization fetches are on-demand, not polled):
-   `… admin --data-dir /data refresh-holder-authorizations`
-4. Set an offer: `… admin --data-dir /data plans set --price-msats <msats>`
-   (a nonzero price also requires the setup-payment wallet gate below).
-5. Restart the app container once
-   (`docker restart fedi-dev-fleet-manager_app_1`): the daemon auto-joins the
-   staging setup-payment federation from the relay's kind-37707 policy, but
-   the advertisement loop silently skips while that wallet gate is closed and
-   nothing wakes it when the join lands (manifold #399). A restart after the
-   join publishes immediately.
+3. Back in the dashboard: open the enrollment/authorization screen (opening
+   it triggers the on-demand fetch — there is no background poll) and confirm
+   the badge shows up.
+4. Set your offer price in the dashboard's plans form (a nonzero price also
+   requires the setup-payment wallet gate below).
+5. Restart the app from the Umbrel UI (app → ⋯ → Restart): the daemon
+   auto-joins the staging setup-payment federation from the relay's
+   kind-37707 policy, but the advertisement loop silently skips while that
+   wallet gate is closed and nothing wakes it when the join lands (manifold
+   #399). A restart after the join publishes immediately.
 6. Verify: the staging relay should carry a kind-37701 advertisement from
    your `service_nostr_pubkey` with your plans, fedimintd version, and
    holder authorization.
