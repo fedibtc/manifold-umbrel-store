@@ -10,24 +10,26 @@ fedimintd `0.11.1-fedi13`, operator dashboard embedded in the daemon.
 
 ## One-time device setup
 
-You need two GitHub tokens (or one token covering both), each SSO-authorized
-for `fedibtc` if prompted:
+You need the shared machine-account token from the team Slack pin /
+password manager (one classic PAT covering the store repo and the GHCR
+packages).
 
-- a token with **read access to this repo** (fine-grained works) for the
-  store URL, and
-- a **classic** PAT with **`read:packages`** (fine-grained does not work with
-  GHCR) for the image pull — until the shared machine-user token lands in the
-  team password manager, mint your own.
+umbrelOS cannot pull private registry images itself (its app engine does
+unauthenticated pulls only — no `docker login` helps), so each device runs a
+loopback **pull-through proxy** that holds the credential and caches images
+from GHCR; the app pulls anonymously from the proxy.
 
-1. **Log the device's Docker into GHCR** (one-time; images are published to
-   private GHCR by manifold CI on every master merge):
+1. **Start the registry proxy** (one-time; paste the shared token in place of
+   `<PAT>`):
 
    ```sh
-   ssh umbrel@umbrel.local
-   docker login ghcr.io -u <your-github-username>
+   ssh umbrel@umbrel.local docker run -d --restart always \
+     --name fedi-dev-registry -p 127.0.0.1:5000:5000 \
+     -e REGISTRY_PROXY_REMOTEURL=https://ghcr.io \
+     -e REGISTRY_PROXY_USERNAME=x \
+     -e REGISTRY_PROXY_PASSWORD=<PAT> \
+     registry:2
    ```
-
-   Paste the classic `read:packages` PAT as the password.
 
 2. **Add this store.** In umbrelOS: **App Store → ⋯ → Community App Stores**,
    paste (with your PAT embedded):
@@ -46,10 +48,9 @@ for `fedibtc` if prompted:
    UI underwriting in manifold PR #330).
 
 If an install or update fails instantly with a generic error, it is almost
-always the GHCR `docker login` from step 1 missing or an expired token.
-Devices set up before the GHCR flip may still run the old loopback registry;
-it is no longer used and can be removed
-(`docker rm -f fedi-dev-registry`).
+always the proxy from step 1 missing (`docker ps | grep fedi-dev-registry`)
+or its baked-in token expired/rotated (recreate the container with the
+current one).
 
 ## Make it discoverable (staging trust material)
 
@@ -107,7 +108,7 @@ private) on every master merge — no manual image building or streaming.
 
 1. Pick the master commit to ship (its publish run must be green).
 2. Point the `image:` tag in `fedi-dev-fleet-manager/docker-compose.yml` at
-   that `<git-sha>` and bump `version` in `umbrel-app.yml`
+   that `<git-sha>` (keeping the `127.0.0.1:5000/fedibtc/` proxy prefix) and bump `version` in `umbrel-app.yml`
    (`0.1.N-master.<shortsha>`); commit and push here. Keep the version
    semver-sortable **above** the previous one (`0.1.2-…` after `0.1.1-…`; a
    `-suffix` sorts *below* its bare version).
