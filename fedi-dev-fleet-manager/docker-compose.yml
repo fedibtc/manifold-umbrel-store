@@ -23,11 +23,11 @@ services:
       - serve
       - --data-dir=/data
       - --manifold-environment=staging
-      - --max-seats=1
+      - --max-seats=3
       - --admin-http-bind=0.0.0.0:8181
       - --admin-http-auth=trusted-proxy
     volumes:
       - ${APP_DATA_DIR}/data:/data
     ports:
-      # Seat port grid: base 30000, 4 ports per seat, max-seats 1.
-      - "30000-30003:30000-30003"
+      # Seat port grid: base 30000, 4 ports per seat, max-seats 3.
+      - "30000-30011:30000-30011"
