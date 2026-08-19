@@ -62,10 +62,11 @@ issuance needs a dev (until the planned staging badge bot lands).
 
 1. Note your FMan's `service_nostr_pubkey` from the dashboard and send it to
    a dev on the team.
-2. **Dev**: issue a level-9 badge. With PR #405 (issuer authorities pinned in
-   the environment profile) the tool signs with the committed staging
-   authority — never pass an ad-hoc keyfile, that's how the staging authority
-   got rotated on 2026-08-18:
+2. **Dev**: issue a level-9 badge from manifold master. Since PR #405 the
+   issuer authorities are pinned in the environment profile and the tool
+   signs with the committed staging authority — there is no keyfile to pass,
+   and pre-#405 checkouts with ad-hoc keyfiles must not be used (that's how
+   the staging authority got rotated on 2026-08-18):
 
    ```sh
    cargo run -p devmon --bin manifold-test-issuer -- \
