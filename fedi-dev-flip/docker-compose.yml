@@ -11,7 +11,7 @@ services:
       APP_PORT: 8173
 
   flip:
-    image: ghcr.io/fedibtc/manifold-flip:2e6485b0e5cd11f9b4394f4f6a6fcdc0ac0d495d
+    image: ghcr.io/fedibtc/manifold-flip:d090989b0696150c477a880fd1f1557a44a38efa
     restart: on-failure
     stop_grace_period: 1m
     volumes:

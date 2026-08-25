@@ -8,7 +8,7 @@ invalidated by any master build (see the migration note at the bottom).
 The images are the public `ghcr.io/fedibtc/manifold-*` packages, published by
 manifold CI on every master merge.
 
-Current packages: FMan `0.1.6-master.2e6485b0`, FLIP `0.1.3-master.2e6485b0` —
+Current packages: FMan `0.1.7-master.d090989b`, FLIP `0.1.4-master.d090989b` —
 built from manifold master, fedimintd `0.11.1-fedi15`, operator dashboard
 embedded in the daemon.
 
@@ -131,7 +131,7 @@ public) on every master merge — no manual image building or streaming.
    Note that builds with different applied SQLite migrations are
    incompatible: an image whose migrations differ from the ones already in
    `/data` will crash-loop with a migration error — uninstall/reinstall and
-   redo the trust-material steps in that case. The `2e6485b0` updates are this case
+   redo the trust-material steps in that case. The `d090989b` updates are this case
    for BOTH apps: FMan's and FLIP's migration files each changed since the
    previous pins, so existing installs of either app need
    uninstall/reinstall.
