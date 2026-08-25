@@ -1,0 +1,65 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      # Umbrel's authenticating proxy fronts the FLIP dashboard (embedded in
+      # the daemon, served on the admin listener). FLIP additionally requires
+      # its own bearer token on every admin call — the app password, which
+      # Umbrel shows on open (`deterministicPassword`).
+      APP_HOST: fedi-dev-flip_flip_1
+      APP_PORT: 8173
+
+  flip:
+    image: ghcr.io/fedibtc/manifold-flip:2e6485b0e5cd11f9b4394f4f6a6fcdc0ac0d495d
+    restart: on-failure
+    stop_grace_period: 1m
+    volumes:
+      - ${APP_DATA_DIR}/data/flip:/var/lib/flip
+    environment:
+      FLIP_MANIFOLD_ENVIRONMENT: staging
+      # One visible credential for the whole app: the Umbrel app password is
+      # the dashboard bearer token. Do not rotate it from the dashboard — the
+      # Umbrel modal keeps showing this value.
+      FLIP_BOOTSTRAP_ADMIN_TOKEN: ${APP_PASSWORD}
+      # Deterministic provider identity: survives reinstalls on the same
+      # device, and the dashboard has no identity-install flow of its own.
+      FLIP_PROVIDER_NOSTR_SECRET_KEY: ${APP_SEED}
+    ports:
+      # Public Liquidity API: Iroh over QUIC. UDP only — a TCP mapping
+      # publishes nothing (manifold PR #444). Host port remapped so this app
+      # coexists with the official fedimintd app (which publishes 8174/udp);
+      # Iroh discovers its observed public address, so host != container is
+      # fine, with relay fallback.
+      - "28174:8174/udp"
+
+  gatewayd:
+    # Upstream gatewayd at v0.12.0-beta.3: the fedi fork's gateway API
+    # (GatewayInfo.registrations) is upstreamed there, so FLIP pairs with a
+    # public image — v0.11.1 upstream fails FLIP's /info deserialize. LDK
+    # mode against Mutinynet: no Bitcoin/LND app dependency, unlike the
+    # official (mainnet-locked) fedimint-gateway app. FLIP allocates funds
+    # from this gateway's wallet; the pairing values the FLIP setup wizard
+    # needs are in the store README.
+    image: fedimint/gatewayd:v0.12.0-beta.3@sha256:a398ca740f5d565b439714546dd7ccdee383df4c502bebbf8073cd704421bbb4
+    restart: on-failure
+    volumes:
+      - ${APP_DATA_DIR}/data/gatewayd:/data
+      # The store's data/ dir is copied to ${APP_DATA_DIR}/data on install;
+      # bind the script itself so it exists inside this container without
+      # exposing the FLIP volume (the official app mounts the whole data dir
+      # instead, which is why its entrypoint lives at /data/entrypoint.sh).
+      - ${APP_DATA_DIR}/data/entrypoint.sh:/entrypoint.sh:ro
+    environment:
+      APP_PASSWORD: ${APP_PASSWORD}
+      FM_GATEWAY_DATA_DIR: /data/gateway
+      FM_GATEWAY_SKIP_SETUP: "true"
+      FM_GATEWAY_LIGHTNING_MODULE_MODE: LNv1
+      FM_GATEWAY_IROH_LISTEN_ADDR: 0.0.0.0:8177
+      FM_DEFAULT_ROUTING_FEES: "2000,5000"
+      FM_DEFAULT_TRANSACTION_FEES: "2000,5000"
+    ports:
+      # Host port remapped: the official fedimint-gateway app publishes
+      # 8177/udp and this store's audience plausibly runs it.
+      - "28177:8177/udp" # iroh
+    entrypoint: /entrypoint.sh

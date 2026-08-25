@@ -1,0 +1,31 @@
+manifestVersion: 1
+id: fedi-dev-flip
+name: Liquidity Provider (staging)
+category: bitcoin
+version: "0.1.3-master.2e6485b0"
+tagline: Provide Fedimint federation liquidity on the Manifold staging environment
+description: >-
+  FLIP (Federation Liquidity Provisioner) offers liquidity to Fedimint
+  federations: it advertises capacity and credentials to Federation
+  Initiators and allocates funds from its bundled Lightning gateway. This staging test build
+  targets the Manifold staging environment
+  (Mutinynet/Signet) — test money only. The bundled gatewayd sidecar is
+  LDK-internal and needs no Bitcoin or Lightning app on the device.
+
+  The dashboard asks for an access token: it is this app's password, shown
+  by Umbrel when you open the app (also under the app's ⋯ → Show details).
+developer: Fedi
+website: https://fedi.xyz
+dependencies: []
+repo: https://github.com/fedibtc/manifold-umbrel-store
+support: https://github.com/fedibtc/manifold-umbrel-store/issues
+port: 8481
+gallery: []
+path: ""
+deterministicPassword: true
+defaultUsername: ""
+defaultPassword: ""
+submitter: Fedi
+submission: https://github.com/fedibtc/manifold-umbrel-store
+releaseNotes: >-
+  Images now pull directly from the public ghcr.io/fedibtc packages: remove the old fedi-dev-registry proxy container and re-add this store by its plain URL. IMPORTANT: this update (master 2e6485b0) changes FLIP's database migrations, so an updated app crash-loops on existing data. Uninstall and reinstall instead — this wipes the app's data including the provider identity — then redo the setup wizard.

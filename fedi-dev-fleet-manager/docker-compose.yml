@@ -1,0 +1,43 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      # Umbrel's authenticating proxy fronts the daemon's operator dashboard
+      # directly: since 0.1.1 the UI is embedded in the fleet-manager binary
+      # (`embedded-operator-ui`) and served on the admin HTTP listener.
+      APP_HOST: fedi-dev-fleet-manager_app_1
+      APP_PORT: 8181
+
+  app:
+    image: ghcr.io/fedibtc/manifold-fman:2e6485b0e5cd11f9b4394f4f6a6fcdc0ac0d495d
+    restart: on-failure
+    stop_grace_period: 1m
+    # The image's stock entrypoint targets production (mainnet Bitcoin Core,
+    # mandatory push gateway). This dev package runs the staging profile
+    # instead: Signet/Mutinynet via the profile's default Esplora backend,
+    # callback-free (no push gateway). The admin listener has no host port;
+    # Umbrel's app_proxy is its only network peer (trusted-proxy contract).
+    entrypoint: ["fleet-manager"]
+    command:
+      - serve
+      - --data-dir=/data
+      - --manifold-environment=staging
+      # No --max-seats: the daemon sizes itself from available RAM
+      # (REQ-seat-capacity-default: one seat per 1.5 GiB, capped at 8).
+      - --admin-http-bind=0.0.0.0:8181
+      - --admin-http-auth=trusted-proxy
+    volumes:
+      - ${APP_DATA_DIR}/data:/data
+    ports:
+      # Seat iroh UDP sockets (p2p and api of each 4-port seat block, base
+      # 30000). Since master ac735450 the daemon binds these on all
+      # interfaces so iroh can hole-punch direct peer paths; publishing them
+      # removes the container NAT layer. Seat ordinals are lifetime-monotonic
+      # (never reused after decommission), so this range covers the first 8
+      # seats the host ever creates; a later ordinal's seat still works but
+      # falls back to public relays until the range is extended. UDP only:
+      # there is no TCP listener at the p2p port in iroh mode, and the api
+      # port's WebSocket API (already public over iroh) is intentionally
+      # left unpublished. ui and metrics stay loopback-only in the daemon.
+      - "30000-30031:30000-30031/udp"

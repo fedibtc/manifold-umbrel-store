@@ -1,0 +1,26 @@
+manifestVersion: 1
+id: fedi-dev-fleet-manager
+name: Fleet Manager (staging)
+category: bitcoin
+version: "0.1.6-master.2e6485b0"
+tagline: Run a Fedimint guardian seat on the Manifold staging environment
+description: >-
+  Fleet Manager coordinates Fedimint guardian seat formation and supervises
+  bundled fedimintd children. This staging test build targets the Manifold
+  staging environment (Mutinynet/Signet via the built-in Esplora backend), so
+  it does not depend on Umbrel's Bitcoin Core app. The operator dashboard is
+  served through Umbrel's authenticated app proxy.
+developer: Fedi
+website: https://fedi.xyz
+dependencies: []
+repo: https://github.com/fedibtc/manifold-umbrel-store
+support: https://github.com/fedibtc/manifold-umbrel-store/issues
+port: 8480
+gallery: []
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+submitter: Fedi
+submission: https://github.com/fedibtc/manifold-umbrel-store
+releaseNotes: >-
+  Images now pull directly from the public ghcr.io/fedibtc packages: remove the old fedi-dev-registry proxy container and re-add this store by its plain URL. IMPORTANT: this update (master 2e6485b0) changes the daemon's database migrations, so an updated app crash-loops on existing data. Uninstall and reinstall instead — this wipes the app's data (guardian identities and seats) — then redo onboarding and the trust-material steps.
