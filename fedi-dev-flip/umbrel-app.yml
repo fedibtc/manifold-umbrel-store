@@ -2,7 +2,7 @@ manifestVersion: 1
 id: fedi-dev-flip
 name: Liquidity Provider (staging)
 category: bitcoin
-version: "0.1.4-master.d090989b"
+version: "0.1.4-master.af81a01a"
 tagline: Provide Fedimint federation liquidity on the Manifold staging environment
 description: >-
   FLIP (Federation Liquidity Provisioner) offers liquidity to Fedimint
@@ -28,4 +28,4 @@ defaultPassword: ""
 submitter: Fedi
 submission: https://github.com/fedibtc/manifold-umbrel-store
 releaseNotes: >-
-  Images now pull directly from the public ghcr.io/fedibtc packages: remove the old fedi-dev-registry proxy container and re-add this store by its plain URL. IMPORTANT: this update (master d090989b) changes FLIP's database migrations, so an updated app crash-loops on existing data. Uninstall and reinstall instead — this wipes the app's data including the provider identity — then redo the setup wizard.
+  Staging version. Please see git log.

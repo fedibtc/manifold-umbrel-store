@@ -8,10 +8,6 @@ invalidated by any master build (see the migration note at the bottom).
 The images are the public `ghcr.io/fedibtc/manifold-*` packages, published by
 manifold CI on every master merge.
 
-Current packages: FMan `0.1.7-master.d090989b`, FLIP `0.1.4-master.d090989b` —
-built from manifold master, fedimintd `0.11.1-fedi15`, operator dashboard
-embedded in the daemon.
-
 ## One-time device setup
 
 1. **Add this store.** In umbrelOS: **App Store → ⋯ → Community App Stores**,
