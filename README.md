@@ -127,7 +127,9 @@ public) on every master merge — no manual image building or streaming.
    Note that builds with different applied SQLite migrations are
    incompatible: an image whose migrations differ from the ones already in
    `/data` will crash-loop with a migration error — uninstall/reinstall and
-   redo the trust-material steps in that case. The `d090989b` updates are this case
-   for BOTH apps: FMan's and FLIP's migration files each changed since the
-   previous pins, so existing installs of either app need
-   uninstall/reinstall.
+   redo the trust-material steps in that case. The `1bd22f38` update is not
+   this case for FMan — its migration files are unchanged since the
+   `af81a01a` pin, so existing FMan installs keep their data. FLIP's
+   persisted allocation record dropped two gateway-observation fields in the
+   same range; unknown fields deserialize away, but uninstall/reinstall a
+   FLIP install that misbehaves after the update rather than debugging it.

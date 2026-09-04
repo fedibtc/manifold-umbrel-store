@@ -2,7 +2,7 @@ manifestVersion: 1
 id: fedi-dev-flip
 name: Liquidity Provider (staging)
 category: bitcoin
-version: "0.1.4-master.af81a01a"
+version: "0.1.5-master.1bd22f38"
 tagline: Provide Fedimint federation liquidity on the Manifold staging environment
 description: >-
   FLIP (Federation Liquidity Provisioner) offers liquidity to Fedimint
