@@ -2,7 +2,7 @@ manifestVersion: 1
 id: fedi-dev-fleet-manager
 name: Fleet Manager (staging)
 category: bitcoin
-version: "0.1.9-master.1bd22f38"
+version: "0.1.10-master.f06c7bbd"
 tagline: Run a Fedimint guardian seat on the Manifold staging environment
 description: >-
   Fleet Manager coordinates Fedimint guardian seat formation and supervises
@@ -23,4 +23,5 @@ defaultPassword: ""
 submitter: Fedi
 submission: https://github.com/fedibtc/manifold-umbrel-store
 releaseNotes: >-
-  Staging version. Please see git log.
+  Update to Manifold master f06c7bbd. Includes the Fedimint v0.11.2-fedi4 P2P deadlock fix and guardian fee policy updates.
+  Staging only; test funds and disposable data.

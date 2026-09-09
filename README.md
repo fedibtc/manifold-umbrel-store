@@ -74,7 +74,7 @@ no log lines, republish the policy with `nak` signed by staging test key 4.
 
 ## What the app runs
 
-- `fleet-manager` (master build, fedimintd `0.11.1-fedi15`) — the FMan
+- `fleet-manager` (master build, fedimintd `0.11.2-fedi4`) — the FMan
   daemon, `--manifold-environment staging`, Bitcoin via the staging profile's
   default Esplora (no Umbrel Bitcoin Core dependency), no push gateway
   (callback-free). Seat capacity is self-sized from available RAM (1 seat per
