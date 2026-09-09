@@ -10,7 +10,7 @@ services:
       APP_PORT: 8181
 
   app:
-    image: ghcr.io/fedibtc/manifold-fman:1bd22f38e2a17519742c12fd449aa8e87ffb48f2
+    image: ghcr.io/fedibtc/manifold-fman:f06c7bbdb1bd3372858358d8ed9dda0855065213
     restart: on-failure
     stop_grace_period: 1m
     # The image's stock entrypoint targets production (mainnet Bitcoin Core,
