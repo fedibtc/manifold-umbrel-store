@@ -24,4 +24,5 @@ submitter: Fedi
 submission: https://github.com/fedibtc/manifold-umbrel-store
 releaseNotes: >-
   Initial production release for Bitcoin mainnet, requiring local Bitcoin Core.
+  Manifold image commit 510747ab84234d130d1cb0bad7476d2f4206054c.
   Push notifications are deferred; telemetry remains enabled.

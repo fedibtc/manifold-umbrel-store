@@ -15,10 +15,8 @@ guardian UDP ports (31000–31031). **Fleet Manager (staging)** remains a separa
 app. Both use the same layout and manual update process: `docker-compose.yml`
 pins the image commit and `umbrel-app.yml` sets the app version.
 
-The production package is a draft until `RELEASE_SHA` is replaced with a
-published amd64 + arm64 image containing Manifold PR #60. Do not publish the
-store update with that placeholder. The initial production app version is
-`0.1.0`.
+The initial production app version is `0.1.0`, pinned to Manifold commit
+`510747ab84234d130d1cb0bad7476d2f4206054c`, published for amd64 and arm64.
 
 Production updates must preserve data: never uninstall or reset to update.
 Use production issuer authorization; the staging badge steps below do not

@@ -6,9 +6,7 @@ services:
       APP_HOST: fedi-dev-fleet-manager-production_app_1
       APP_PORT: 8181
   app:
-    # Before publishing, pin a successful two-architecture build including
-    # manifold PR #60 (optional push gateway).
-    image: ghcr.io/fedibtc/manifold-fman:RELEASE_SHA
+    image: ghcr.io/fedibtc/manifold-fman:510747ab84234d130d1cb0bad7476d2f4206054c
     restart: on-failure
     stop_grace_period: 1m
     environment:
