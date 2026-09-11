@@ -1,0 +1,23 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: fedi-dev-fleet-manager-production_app_1
+      APP_PORT: 8181
+  app:
+    image: ghcr.io/fedibtc/manifold-fman:510747ab84234d130d1cb0bad7476d2f4206054c
+    restart: on-failure
+    stop_grace_period: 1m
+    environment:
+      FLEET_MANAGER_MANIFOLD_ENVIRONMENT: production
+      FLEET_MANAGER_BITCOIND_URL: http://${APP_BITCOIN_NODE_IP}:${APP_BITCOIN_RPC_PORT}
+      FLEET_MANAGER_BITCOIND_USERNAME: ${APP_BITCOIN_RPC_USER}
+      FLEET_MANAGER_BITCOIND_PASSWORD: ${APP_BITCOIN_RPC_PASS}
+      FLEET_MANAGER_ADMIN_HTTP_BIND: 0.0.0.0:8181
+      FLEET_MANAGER_ADMIN_HTTP_AUTH: trusted-proxy
+    volumes:
+      - ${APP_DATA_DIR}/data:/data
+    ports:
+      # Separate host ports let production and staging run together.
+      - "31000-31031:30000-30031/udp"
