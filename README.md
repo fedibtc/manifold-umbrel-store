@@ -1,14 +1,41 @@
 # Fedi Dev — Umbrel community app store
 
-Umbrel app store for testing Fleet Manager (FMan) and FLIP on personal Umbrel
-devices against the Manifold **staging** environment (Mutinynet/Signet). Not
-for production use: no warranty, staging trust material only, and data can be
-invalidated by any master build (see the migration note at the bottom).
+Umbrel app store for Fleet Manager (FMan) and staging FLIP. The apps marked
+**staging** use Mutinynet/Signet, staging trust material, and disposable data
+that any master build may invalidate (see the migration note at the bottom).
 
 The images are the public `ghcr.io/fedibtc/manifold-*` packages, published by
 manifold CI on every master merge.
 
-## One-time device setup
+## Production Fleet Manager
+
+**Fleet Manager** (`fedi-dev-fleet-manager-production`) requires the local
+Bitcoin Core app on mainnet and keeps its own data, dashboard port (8482), and
+guardian UDP ports (31000–31031). **Fleet Manager (staging)** remains a separate
+app. Both use the same layout and manual update process: `docker-compose.yml`
+pins the image commit and `umbrel-app.yml` sets the app version.
+
+The production package is a draft until `RELEASE_SHA` is replaced with a
+published amd64 + arm64 image containing Manifold PR #60. Do not publish the
+store update with that placeholder. The initial production app version is
+`0.1.0`.
+
+Production updates must preserve data: never uninstall or reset to update.
+Use production issuer authorization; the staging badge steps below do not
+apply. Telemetry registers using the signed production setup-payment policy;
+push notifications are deferred. See Manifold's
+[release and data policy](https://github.com/fedibtc/manifold/blob/master/packages/fleet-manager/production-releases.md).
+
+To release a production update:
+
+1. Choose a successful amd64 + arm64 Manifold image publish and put its full
+   commit in `fedi-dev-fleet-manager-production/docker-compose.yml`.
+2. Increase the version in that app's `umbrel-app.yml` and record the image
+   commit and changes in its release notes.
+3. Verify installation and data-preserving update on Umbrel, then publish the
+   reviewed commit. Devices receive the normal one-click Update.
+
+## Staging device setup
 
 1. **Add this store.** In umbrelOS: **App Store → ⋯ → Community App Stores**,
    paste:
@@ -110,7 +137,7 @@ the gateway id itself):
 
 Funding, trust material, and the full walkthrough: internal runbook (Phase 2).
 
-## Releasing an update
+## Releasing a staging update
 
 Manifold CI publishes `ghcr.io/fedibtc/manifold-fman:<git-sha>` (multi-arch,
 public) on every master merge — no manual image building or streaming.
