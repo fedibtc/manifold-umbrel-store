@@ -6,11 +6,12 @@ services:
       APP_HOST: fedi-dev-fleet-manager-production_app_1
       APP_PORT: 8181
   app:
-    image: ghcr.io/fedibtc/manifold-fman:510747ab84234d130d1cb0bad7476d2f4206054c
+    image: ghcr.io/fedibtc/manifold-fman:d87b6dd2d984b3f15bc214718debfcc9648654d8
     restart: on-failure
     stop_grace_period: 1m
     environment:
       FLEET_MANAGER_MANIFOLD_ENVIRONMENT: production
+      FLEET_MANAGER_ESPLORA_URL: https://mempool.space/api
       FLEET_MANAGER_BITCOIND_URL: http://${APP_BITCOIN_NODE_IP}:${APP_BITCOIN_RPC_PORT}
       FLEET_MANAGER_BITCOIND_USERNAME: ${APP_BITCOIN_RPC_USER}
       FLEET_MANAGER_BITCOIND_PASSWORD: ${APP_BITCOIN_RPC_PASS}
