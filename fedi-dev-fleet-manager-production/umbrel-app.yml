@@ -2,7 +2,7 @@ manifestVersion: 1
 id: fedi-dev-fleet-manager-production
 name: Fleet Manager
 category: bitcoin
-version: "0.1.1"
+version: "0.1.2"
 tagline: Run Fedimint guardians on Bitcoin mainnet
 description: >-
   Fleet Manager runs Fedimint guardians on the Manifold production environment.
@@ -23,8 +23,10 @@ defaultPassword: ""
 submitter: Fedi
 submission: https://github.com/fedibtc/manifold-umbrel-store
 releaseNotes: >-
-  Adds Esplora fallback for pruned Bitcoin Core, authorization renewal after setup,
-  and payout fixes. Back up before updating; existing data is retained.
-  Manifold image commit d87b6dd2d984b3f15bc214718debfcc9648654d8.
-  Upgrade and restart tested on Umbrel with existing data and pruned Core.
-  Release prepared by Codex (/root).
+  Update Fleet Manager to Manifold 395e3b6ab673b51f00a949644d641f6697ebdb13
+  with Fedimint v0.12.0-fedi4, including same-chain Core/Esplora routing,
+  primary-first broadcast fallback, Esplora block validation, and DKG fixes.
+  Back up the complete stopped data directory before updating.
+  Existing 0.11 guardian upgrades and packaged-device upgrades have not been qualified.
+  Preserve existing data; do not uninstall, reset, or re-onboard to update.
+  Production rollout requires upgrade qualification with existing guardian and wallet data.
