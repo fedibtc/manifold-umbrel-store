@@ -6,7 +6,7 @@ services:
       APP_HOST: fedi-dev-fleet-manager-production_app_1
       APP_PORT: 8181
   app:
-    image: ghcr.io/fedibtc/manifold-fman:d87b6dd2d984b3f15bc214718debfcc9648654d8
+    image: ghcr.io/fedibtc/manifold-fman:395e3b6ab673b51f00a949644d641f6697ebdb13
     restart: on-failure
     stop_grace_period: 1m
     environment:
