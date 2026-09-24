@@ -23,9 +23,14 @@ defaultPassword: ""
 submitter: Fedi
 submission: https://github.com/fedibtc/manifold-umbrel-store
 releaseNotes: >-
-  Update Fleet Manager to Manifold d32c0ef4b0a3b7881f0c98f6cf944a7a349c650d
-  with Fedimint v0.12.0-fedi7, matching the FMan image pinned by the
-  Start9 Community Manifold Fedimint Guardian 0.1.0:0 release.
+  Lower base ecash fees for new federations from 100 to 10 msat per input and
+  output. Existing federations keep their configured fees. Guardian health
+  checks now reconnect after a server returns. Correct Bitcoin Core/Esplora
+  routing, including Esplora block counts while Bitcoin Core initially syncs.
+  Show requested and invoiced amounts in payment mismatch errors, and update
+  dashboard wording to Manifold Fedimint Guardian and Federation Ambassador.
+  Includes Fedimint v0.12.0-fedi7 in Manifold
+  d32c0ef4b0a3b7881f0c98f6cf944a7a349c650d.
   Back up the complete stopped data directory before updating.
   Existing 0.11 guardian upgrades and packaged-device upgrades have not been qualified.
   Preserve existing data; do not uninstall, reset, or re-onboard to update.
